@@ -23,6 +23,7 @@
     "@types/react": "^16.9.32",
     "@types/react-sortable-hoc": "^0.7.1",
     "@types/styled-jsx": "^2.2.8",
+    "node-pre-gyp": "^0.14.0",
     "tslint": "^6.1.1"
   },
   "scripts": {
