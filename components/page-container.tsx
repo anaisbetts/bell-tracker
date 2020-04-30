@@ -44,11 +44,13 @@ const stylesheet = (<style jsx global>{`
     font-family: "Source Sans Pro", Arial;
     font-size: 1.35em;
   }
+  .container h1,h2,h3,h4,h5 {
+    filter: drop-shadow(4px 2px 4px #444);
+    font-family: Pacifico;
+  }
 
   .container h2 {
-    filter: drop-shadow(4px 2px 4px #444);
     margin-bottom: 2px;
-    font-family: Pacifico;
     font-size: 1.5rem;
     padding-right: 4px;
   }
