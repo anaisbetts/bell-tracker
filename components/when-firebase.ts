@@ -12,9 +12,14 @@ import {
   PropSelector,
 } from '@whenjs/when';
 
+import * as firebase from 'firebase/app';
+
+import 'firebase/auth';
+import 'firebase/firestore';
+
 import { useState } from 'react';
-import { concat, Observable, of, Observer } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { concat, Observable, Observer, of, throwError } from 'rxjs';
+import { filter, flatMap, map } from 'rxjs/operators';
 import { useObservable } from './use-helpers';
 
 function queryUpdates(query: Query): Observable<QuerySnapshot> {
@@ -100,6 +105,12 @@ export function useDocument(doc: () => DocumentReference) {
     return new Observable((subj: Observer<DocumentSnapshot>) =>
       doc().onSnapshot(subj));
   });
+}
+
+export function useAuthChanged() {
+  return useObservable(() =>
+    new Observable((subj: Observer<firebase.User | null>) =>
+      firebase.auth().onAuthStateChanged(subj)));
 }
 
 export function useQuery(query: () => Query) {

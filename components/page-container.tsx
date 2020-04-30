@@ -1,4 +1,6 @@
 import * as React from 'react';
+import { useLayoutEffect } from 'react';
+
 import Head from 'next/head';
 
 import {
@@ -43,7 +45,14 @@ const stylesheet = (<style jsx global>{`
   .container {
     font-family: "Source Sans Pro", Arial;
     font-size: 1.35em;
+    height: 100vh;
+    height: calc(var(--vh, 1vh) * 100);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
+
   .container h1,h2,h3,h4,h5 {
     filter: drop-shadow(4px 2px 4px #444);
     font-family: Pacifico;
@@ -57,18 +66,30 @@ const stylesheet = (<style jsx global>{`
 `}</style>);
 
 // tslint:disable-next-line:variable-name
-const PageContainer: React.FunctionComponent = ({ children }) => (
-  <>
-    <Head>
-      <link href='https://fonts.googleapis.com/css?family=Pacifico&display=swap' rel='stylesheet'></link>
-    </Head>
+const PageContainer: React.FunctionComponent = ({ children }) => {
+  useLayoutEffect(() => {
+    const fix = () => {
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+    };
 
-    {stylesheet}
+    window.addEventListener('resize', fix);
+    fix();
+  });
 
-    <div className='container backgroundImage'>
-      {children}
-    </div>
-  </>
-);
+  return (
+    <>
+      <Head>
+        <link href='https://fonts.googleapis.com/css?family=Pacifico&display=swap' rel='stylesheet'></link>
+      </Head>
+
+      {stylesheet}
+
+      <div className='container backgroundImage'>
+        {children}
+      </div>
+    </>
+  );
+};
 
 export default PageContainer;
