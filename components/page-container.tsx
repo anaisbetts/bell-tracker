@@ -7,6 +7,11 @@ import {
   BACKGROUND_COLOR, TEXT_ON_BACKGROUND_COLOR,
 } from './size-constants';
 
+import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
+
+import purple from '@material-ui/core/colors/purple';
+import green from '@material-ui/core/colors/green';
+
 const backgrounds = ['endless-clouds.svg', 'topography.svg'];
 
 const directionX = Math.random() > 0.5 ? 1 : -1;
@@ -77,17 +82,37 @@ const PageContainer: React.FunctionComponent = ({ children }) => {
     fix();
   });
 
+  const theme = createMuiTheme({
+    palette: {
+      primary: purple,
+      secondary: green,
+    },
+    typography: {
+      fontFamily: '"Source Sans Pro", Arial',
+      button: {
+        textTransform: 'none'
+      }
+    },
+  });
+
   return (
     <>
       <Head>
         <link href='https://fonts.googleapis.com/css?family=Pacifico&display=swap' rel='stylesheet'></link>
+        <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro&display=swap' rel='stylesheet'></link>
+        <meta
+          name="viewport"
+          content="minimum-scale=1, initial-scale=1, width=device-width"
+        />
       </Head>
 
       {stylesheet}
 
-      <div className='container backgroundImage'>
-        {children}
-      </div>
+      <ThemeProvider theme={theme}>
+        <div className='container backgroundImage'>
+          {children}
+        </div>
+      </ThemeProvider>
     </>
   );
 };

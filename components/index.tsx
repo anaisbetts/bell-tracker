@@ -33,6 +33,10 @@ export default () => {
         ul {
           overflow-y: auto;
         }
+
+        .MuiButtonBase-root {
+          border-radius: 16px !important;
+        }
       `}</style>
 
       <PageContainer>
