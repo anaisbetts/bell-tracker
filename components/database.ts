@@ -13,13 +13,24 @@ export interface BellEvent {
   value: number;
 }
 
+export interface ActivityDefinition {
+  createdAt: firestore.Timestamp;
+  description: string;
+  value: number;
+  isSpend: boolean;
+}
+
 export function currentBellsDoc() {
   return db.doc('aggregates/bellValues');
 }
 
+export function activityListColl() {
+  return db.collection('activity-options');
+}
+
 export async function fetchAndUpdateCurrentBells() {
   const existingAggregate = await (currentBellsDoc().get());
-  const currentBells =  existingAggregate.data() as BellAggregate;
+  const currentBells = existingAggregate.data() as BellAggregate;
 
   const eventsSince = await db.collection('events').where('createdAt', '>=', currentBells.computedAt).get();
   if (eventsSince.docs.length === 0) {
