@@ -78,19 +78,9 @@ export default () => {
     });
 
   return (
-    <>
-      <style jsx global>{`
-        .container {
-          padding: 24px;
-        }
-      `}</style>
-
-      <PageContainer>
-        <RequireGoogleAuth>
-          <h2>Available Activities</h2>
-          {activityMarkup}
-        </RequireGoogleAuth>
-      </PageContainer>
-    </>
+    <RequireGoogleAuth>
+      <h2>Available Activities</h2>
+      {activityMarkup}
+    </RequireGoogleAuth>
   );
 };
