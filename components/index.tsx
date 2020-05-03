@@ -15,27 +15,8 @@ export default () => {
   return (
     <>
       <style jsx global>{`
-        ul {
-          margin: 0;
-          padding: 0;
-          list-style-type: none
-        }
-
         .container {
           padding: 128px;
-          height: 100vw;
-        }
-
-        a {
-          color: inherit;
-        }
-
-        ul {
-          overflow-y: auto;
-        }
-
-        .MuiButtonBase-root {
-          border-radius: 16px !important;
         }
       `}</style>
 

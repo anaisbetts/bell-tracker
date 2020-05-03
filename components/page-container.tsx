@@ -47,6 +47,24 @@ const stylesheet = (<style jsx global>{`
     animation: animatedBackground 120s linear infinite alternate;
   }
 
+  ul {
+    margin: 0;
+    padding: 0;
+    list-style-type: none
+  }
+
+  a {
+    color: inherit;
+  }
+
+  ul {
+    overflow-y: auto;
+  }
+
+  .MuiButtonBase-root {
+    border-radius: 16px !important;
+  }
+
   .container {
     font-family: "Source Sans Pro", Arial;
     font-size: 1.35em;
