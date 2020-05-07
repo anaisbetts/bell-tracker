@@ -4,7 +4,7 @@ import dynamic from 'next/dynamic';
 import PageContainer from '../components/page-container';
 
 // tslint:disable-next-line:variable-name
-const SSRIsAStupidFeatureThatIsMoreTroubleThanItsWorth = dynamic(() => import('../components/index'), {
+const SSRIsAStupidFeatureThatIsMoreTroubleThanItsWorth = dynamic(() => import('../components/mamas'), {
   ssr: false,
 });
 
@@ -12,10 +12,11 @@ export default () => (
   <>
     <style jsx global>{`
       .container {
-        padding: 128px;
+        padding-left: 24px;
+        padding-right: 24px;
+        overflow-y: auto;
       }
     `}</style>
-
 
     <PageContainer>
       <SSRIsAStupidFeatureThatIsMoreTroubleThanItsWorth />

@@ -19,68 +19,24 @@ import 'firebase/firestore';
 
 import { useState } from 'react';
 import { concat, Observable, Observer, of, throwError } from 'rxjs';
-import { filter, flatMap, map } from 'rxjs/operators';
+import { filter, map } from 'rxjs/operators';
 import { useObservable } from './use-helpers';
 
-function queryUpdates(query: Query): Observable<QuerySnapshot> {
+export function listenQuery<T>(query: Query): Observable<QuerySnapshot<T>> {
   return Observable.create(query.onSnapshot.bind(query));
 }
 
-function documentUpdates(doc: DocumentReference): Observable<DocumentSnapshot> {
+export function listenDocument(doc: DocumentReference): Observable<DocumentSnapshot> {
   return Observable.create(doc.onSnapshot.bind(doc));
 }
 
-export function toData<T>(doc: DocumentSnapshot): T | null {
+export function toData<T>(doc: DocumentSnapshot): DocumentSnapshot<T> | null {
   if (!doc.exists) {
     return null;
   }
 
   const data: any = doc.data();
-  return data as T;
-}
-
-function toDatas<T>(query: QuerySnapshot): T[] {
-  return query.docs.reduce((acc: T[], x) => {
-    const item = toData<T>(x);
-    if (item) {
-      acc.push(item);
-    }
-    return acc;
-  }, []);
-}
-
-export function lazyForQuery<T extends Model, TProp>(
-  target: T,
-  prop: PropSelector<T, TProp[]>,
-  query: Query,
-) {
-  const [name] = propertySelectorToNames(prop, 1);
-  const listener = queryUpdates(query);
-
-  lazyFor(target, prop, () => query.get().then(xs => toDatas<TProp>(xs)));
-  target.addTeardown(
-    listener.pipe(map(xs => toDatas<TProp>(xs))).subscribe(x => {
-      const t: any = target;
-      t[name] = x;
-    }),
-  );
-}
-
-export function lazyForDocument<T extends Model, TProp>(
-  target: T,
-  prop: PropSelector<T, TProp>,
-  doc: DocumentReference,
-) {
-  const [name] = propertySelectorToNames(prop, 1);
-  const listener = documentUpdates(doc);
-
-  lazyFor(target, prop, () => doc.get().then(x => toData<TProp>(x)));
-  target.addTeardown(
-    listener.pipe(map(x => toData<TProp>(x))).subscribe(x => {
-      const t: any = target;
-      t[name] = x;
-    }),
-  );
+  return doc as DocumentSnapshot<T>;
 }
 
 export function useDocumentData<T>(
@@ -89,12 +45,12 @@ export function useDocumentData<T>(
 ) {
   const [d] = useState(doc);
 
-  return useObservable<T | null>(() => {
+  return useObservable<DocumentSnapshot<T> | null>(() => {
     const initial = snapshot
       ? of(toData<T>(snapshot))
       : d.get().then(x => toData<T>(x));
 
-    const update = documentUpdates(d).pipe(map(x => toData<T>(x)));
+    const update = listenDocument(d).pipe(map(x => toData<T>(x)));
 
     return concat(initial, update);
   });
@@ -113,8 +69,8 @@ export function useAuthChanged() {
       firebase.auth().onAuthStateChanged(subj)));
 }
 
-export function useQuery(query: () => Query) {
+export function useQuery<T>(query: () => Query) {
   return useObservable(() =>
-    queryUpdates(query()).pipe(filter(x => x && x.docChanges().length > 0)),
+    listenQuery<T>(query()).pipe(filter(x => x && x.docChanges().length > 0)),
   );
 }
