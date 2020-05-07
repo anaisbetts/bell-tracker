@@ -66,10 +66,6 @@ const stylesheet = (<style jsx global>{`
     font-size: 1.35em;
     height: 100vh;
     height: calc(var(--vh, 1vh) * 100);
-
-    display: flex;
-    flex-direction: column;
-    align-items: center;
   }
 
   .container h1,h2,h3,h4,h5 {

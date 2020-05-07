@@ -6,8 +6,8 @@ import RequireGoogleAuth from './require-google-auth';
 
 import { db } from './firebase';
 
-import { fetchAndUpdateCurrentBells, ActivityDefinition, populateFromSeeds } from './database';
-import { usePromise } from './use-helpers';
+import { fetchAndUpdateCurrentBells, ActivityDefinition, populateFromSeeds, addBellEvent, listenCurrentBells } from './database';
+import { usePromise, useObservable } from './use-helpers';
 import { useQuery } from './when-firebase';
 
 function itemsIntoRows<T>(items: T[], count: number): Array<Array<T>> {
@@ -34,11 +34,11 @@ interface HasDocumentId {
   id: string
 };
 
-const ActivityButtonSection: React.FC<{ label: string, items: (ActivityDefinition & HasDocumentId)[] }> = ({ label, items }) => {
+const ActivityButtonSection: React.FC<{ currentBells: number, label: string, items: (ActivityDefinition & HasDocumentId)[] }> = ({ currentBells, label, items }) => {
   const list = itemsIntoRows(items, 2).map(xs =>  {
     const btns = xs.map(x => 
       <li key={x.description}>
-        <Button variant="contained" color="primary" key={x.id}>
+        <Button disabled={x.isSpend && currentBells + x.value < 0} variant="contained" color="primary" key={x.id} onClick={() => addBellEvent(x.id)}>
           {x.description}
         </Button>
       </li>);
@@ -73,7 +73,7 @@ const ActivityButtonSection: React.FC<{ label: string, items: (ActivityDefinitio
 }
 
 export default () => {
-  const bells = usePromise(() => fetchAndUpdateCurrentBells());
+  const bells = useObservable(() => listenCurrentBells());
   const activityColl = useQuery<ActivityDefinition>(() => db.collection('activity-options'));
 
   const activities = activityColl.map(xs => {
@@ -91,16 +91,22 @@ export default () => {
       const losing = xs.filter(x => x.value < 0 && !x.isSpend);
       const spending = xs.filter(x => x.isSpend);
 
+      let bellCount = 0;
+      if (bells.isOk()) {
+        bellCount = bells.ok() || 0;
+      }
+
       return <>
-        <ActivityButtonSection label="Add Bells" items={gaining} />
-        <ActivityButtonSection label="Take Bells" items={losing} />
-        <ActivityButtonSection label="Spend Bells" items={spending} />
+        <h2>Adeline has {bellCount} bells!</h2>
+
+        <ActivityButtonSection currentBells={bellCount} label="Add Bells" items={gaining} />
+        <ActivityButtonSection currentBells={bellCount} label="Take Bells" items={losing} />
+        <ActivityButtonSection currentBells={bellCount} label="Spend Bells" items={spending} />
       </>
     });
 
   return (
     <RequireGoogleAuth>
-      <h2>Add some Bells!</h2>
       {activityMarkup}
     </RequireGoogleAuth>
   );
