@@ -71,28 +71,28 @@ export const seeds = [
   },
   {
     "description": "15 minutes of device time",
-    "value": 5,
-    "isSpend": "TRUE"
+    "value": -5,
+    "isSpend": true
   },
   {
     "description": "30 minutes of device time with A Friend",
-    "value": 5,
-    "isSpend": "TRUE"
+    "value": -5,
+    "isSpend": true
   },
   {
     "description": "Dinner requests",
-    "value": 10,
-    "isSpend": "TRUE"
+    "value": -10,
+    "isSpend": true
   },
   {
     "description": "Movie night",
-    "value": 10,
-    "isSpend": "TRUE"
+    "value": -10,
+    "isSpend": true
   },
   {
     "description": "New My City game + 15 minutes of device time",
-    "value": 50,
-    "isSpend": "TRUE"
+    "value": -50,
+    "isSpend": true
   },
   {
     "description": "throwing things",
