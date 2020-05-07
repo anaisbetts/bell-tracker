@@ -2,12 +2,11 @@ import * as React from 'react';
 
 import { Button } from '@material-ui/core';
 
-import PageContainer from './page-container';
 import RequireGoogleAuth from './require-google-auth';
 
 import { db } from './firebase';
 
-import { fetchAndUpdateCurrentBells, ActivityDefinition } from './database';
+import { fetchAndUpdateCurrentBells, ActivityDefinition, populateFromSeeds } from './database';
 import { usePromise } from './use-helpers';
 import { useQuery } from './when-firebase';
 
@@ -31,23 +30,44 @@ function itemsIntoRows<T>(items: T[], count: number): Array<Array<T>> {
   return ret;
 }
 
-const ActivityButtonSection: React.FC<{ label: string, items: ActivityDefinition[] }> = ({ label, items }) => {
+interface HasDocumentId {
+  id: string
+};
+
+const ActivityButtonSection: React.FC<{ label: string, items: (ActivityDefinition & HasDocumentId)[] }> = ({ label, items }) => {
   const list = itemsIntoRows(items, 2).map(xs =>  {
     const btns = xs.map(x => 
-      <div className="btnContainer">
-        <Button variant="contained" color="primary" key={x.description}>
+      <li key={x.description}>
+        <Button variant="contained" color="primary" key={x.id}>
           {x.description}
         </Button>
-      </div>);
+      </li>);
 
-    return <li key={xs[0].createdAt.valueOf()}>{btns}</li>
+    return <>{btns}</>;
   });
 
   return <>
-    <h3>{label}</h3>
+    <h4>{label}</h4>
     <ul>{list}</ul>
 
-    <style jsx global>{`
+    <style jsx>{`
+      ul {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto;
+
+        justify-items: center;
+        align-items: center;
+
+        padding: 16px;
+        grid-gap: 12px;
+        border-radius: 8px;
+        background: #ffffff44;
+      }
+
+      h4 {
+        align-self: start;
+      }
     `}</style>
     </>;
 }
@@ -58,28 +78,29 @@ export default () => {
 
   const activities = activityColl.map(xs => {
     if (!xs) return [];
-    return xs.docs.map(x => x.data());
+    return xs.docs.map(x => ({
+      id: x.id,
+      ...x.data()
+    }));
   });
 
   const activityMarkup = activities.mapOrElse(
     <h2>Error loading activities!</h2>,
     (xs) => {
-      console.log(`activities has ${xs.length} items!`);
-
       const gaining = xs.filter(x => x.value > 0);
-      const losing = xs.filter(x => x.value < 0 && x.isSpend);
+      const losing = xs.filter(x => x.value < 0 && !x.isSpend);
       const spending = xs.filter(x => x.isSpend);
 
       return <>
-        <ActivityButtonSection label="Gaining Bells" items={gaining} />
-        <ActivityButtonSection label="Losing Bells" items={losing} />
-        <ActivityButtonSection label="Spending Bells" items={spending} />
+        <ActivityButtonSection label="Add Bells" items={gaining} />
+        <ActivityButtonSection label="Take Bells" items={losing} />
+        <ActivityButtonSection label="Spend Bells" items={spending} />
       </>
     });
 
   return (
     <RequireGoogleAuth>
-      <h2>Available Activities</h2>
+      <h2>Add some Bells!</h2>
       {activityMarkup}
     </RequireGoogleAuth>
   );

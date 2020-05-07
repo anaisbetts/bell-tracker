@@ -57,10 +57,6 @@ const stylesheet = (<style jsx global>{`
     color: inherit;
   }
 
-  ul {
-    overflow-y: auto;
-  }
-
   .MuiButtonBase-root {
     border-radius: 16px !important;
   }

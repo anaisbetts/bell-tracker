@@ -13,6 +13,8 @@ export default () => (
     <style jsx global>{`
       .container {
         padding: 24px;
+        padding-bottom: 64px;
+        overflow-y: auto;
       }
     `}</style>
 
