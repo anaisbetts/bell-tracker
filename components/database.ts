@@ -1,20 +1,25 @@
 import { db } from './firebase';
 
-import { firestore } from 'firebase/app';
+import { firestore, auth } from 'firebase/app';
+import { seeds } from './seeds';
+import { asyncMap } from './promise-extra';
 
 export interface BellAggregate {
   computedAt: firestore.Timestamp;
   value: number;
 }
 
-export interface BellEvent {
-  activityId: firestore.DocumentReference;
+export interface RowBase {
   createdAt: firestore.Timestamp;
+  createdBy: string;
+}
+
+export interface BellEvent extends RowBase {
+  activityId: firestore.DocumentReference;
   value: number;
 }
 
-export interface ActivityDefinition {
-  createdAt: firestore.Timestamp;
+export interface ActivityDefinition extends RowBase {
   description: string;
   value: number;
   isSpend: boolean;
@@ -26,6 +31,10 @@ export function currentBellsDoc() {
 
 export function activityListColl() {
   return db.collection('activity-options');
+}
+
+export function currentUserName() {
+  return auth().currentUser?.email;
 }
 
 export async function fetchAndUpdateCurrentBells() {
@@ -49,4 +58,21 @@ export async function fetchAndUpdateCurrentBells() {
     ex => console.error(`Failed to update bell aggregate: ${ex.message}`));
 
   return newBells;
+}
+
+export async function populateFromSeeds() {
+  const coll = db.collection('activity-options');
+  const user = currentUserName();
+
+  if (!user) {
+    throw new Error("Must be authenticated!");
+  }
+
+  const ret = await asyncMap(seeds, x => coll.add({
+    ...x,
+    createdAt: new Date(),
+    createdBy: user,
+  }));
+
+  return Array.from(ret.values());
 }
