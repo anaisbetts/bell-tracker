@@ -12,8 +12,8 @@ export default () => (
   <>
     <style jsx global>{`
       .container {
-        padding: 24px;
-        padding-bottom: 64px;
+        padding-left: 24px;
+        padding-right: 24px;
         overflow-y: auto;
       }
     `}</style>

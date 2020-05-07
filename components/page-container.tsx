@@ -65,7 +65,6 @@ const stylesheet = (<style jsx global>{`
     font-family: "Source Sans Pro", Arial;
     font-size: 1.35em;
     height: 100vh;
-    height: calc(var(--vh, 1vh) * 100);
   }
 
   .container h1,h2,h3,h4,h5 {
@@ -82,16 +81,6 @@ const stylesheet = (<style jsx global>{`
 
 // tslint:disable-next-line:variable-name
 const PageContainer: React.FunctionComponent = ({ children }) => {
-  useLayoutEffect(() => {
-    const fix = () => {
-      const vh = window.innerHeight * 0.01;
-      document.documentElement.style.setProperty('--vh', `${vh}px`);
-    };
-
-    window.addEventListener('resize', fix);
-    fix();
-  });
-
   const theme = createMuiTheme({
     palette: {
       primary: purple,
