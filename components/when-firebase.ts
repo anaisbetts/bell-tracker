@@ -22,11 +22,11 @@ import { concat, Observable, Observer, of, throwError } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { useObservable } from './use-helpers';
 
-function queryUpdates<T>(query: Query): Observable<QuerySnapshot<T>> {
+export function listenQuery<T>(query: Query): Observable<QuerySnapshot<T>> {
   return Observable.create(query.onSnapshot.bind(query));
 }
 
-function documentUpdates(doc: DocumentReference): Observable<DocumentSnapshot> {
+export function listenDocument(doc: DocumentReference): Observable<DocumentSnapshot> {
   return Observable.create(doc.onSnapshot.bind(doc));
 }
 
@@ -50,7 +50,7 @@ export function useDocumentData<T>(
       ? of(toData<T>(snapshot))
       : d.get().then(x => toData<T>(x));
 
-    const update = documentUpdates(d).pipe(map(x => toData<T>(x)));
+    const update = listenDocument(d).pipe(map(x => toData<T>(x)));
 
     return concat(initial, update);
   });
@@ -71,6 +71,6 @@ export function useAuthChanged() {
 
 export function useQuery<T>(query: () => Query) {
   return useObservable(() =>
-    queryUpdates<T>(query()).pipe(filter(x => x && x.docChanges().length > 0)),
+    listenQuery<T>(query()).pipe(filter(x => x && x.docChanges().length > 0)),
   );
 }
