@@ -3,14 +3,17 @@ import { db } from './firebase';
 import { firestore, auth } from 'firebase/app';
 import { seeds } from './seeds';
 import { asyncMap } from './promise-extra';
+import { listenDocument } from './when-firebase';
+import { flatMap } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 export interface BellAggregate {
-  computedAt: firestore.Timestamp;
+  computedAt: firestore.Timestamp | Date;
   value: number;
-}
+};
 
 export interface RowBase {
-  createdAt: firestore.Timestamp;
+  createdAt: firestore.Timestamp | Date;
   createdBy: string;
 }
 
@@ -33,12 +36,35 @@ export function activityListColl() {
   return db.collection('activity-options');
 }
 
+export function eventsColl() {
+  return db.collection('events');
+}
+
 export function currentUserName() {
   return auth().currentUser?.email;
 }
 
-export async function fetchAndUpdateCurrentBells() {
+export function listenCurrentBells() {
+  return listenDocument(currentBellsDoc()).pipe(
+    flatMap(x => x.exists ? of(x.data()!.value as number) : fetchAndUpdateCurrentBells())
+  );
+}
+
+function seedNewAggregate() {
+  return currentBellsDoc().set({
+    value: 0,
+    computedAt: new Date(0)
+  });
+}
+
+export async function fetchAndUpdateCurrentBells(): Promise<number> {
   const existingAggregate = await (currentBellsDoc().get());
+
+  if (!existingAggregate.exists) {
+    await seedNewAggregate();
+    return await fetchAndUpdateCurrentBells();
+  }
+
   const currentBells = existingAggregate.data() as BellAggregate;
 
   const eventsSince = await db.collection('events').where('createdAt', '>=', currentBells.computedAt).get();
@@ -60,14 +86,39 @@ export async function fetchAndUpdateCurrentBells() {
   return newBells;
 }
 
-export async function populateFromSeeds() {
-  const coll = db.collection('activity-options');
+export async function addBellEvent(activityId: string) {
   const user = currentUserName();
 
   if (!user) {
     throw new Error("Must be authenticated!");
   }
 
+  const activity = await activityListColl().doc(activityId).get() as firestore.DocumentSnapshot<ActivityDefinition>;
+  if (!activity.exists) {
+    throw new Error("Can't add bell event, the activity doesn't exist!");
+  }
+
+  const newEvent: BellEvent = {
+    activityId: activity.ref,
+    createdAt: new Date(),
+    createdBy: user,
+    value: activity.data()!.value
+  };
+
+  const ret = await eventsColl().add(newEvent);
+  await fetchAndUpdateCurrentBells();
+
+  return ret;
+}
+
+export async function populateFromSeeds() {
+  const user = currentUserName();
+
+  if (!user) {
+    throw new Error("Must be authenticated!");
+  }
+
+  const coll = activityListColl();
   const ret = await asyncMap(seeds, x => coll.add({
     ...x,
     createdAt: new Date(),
