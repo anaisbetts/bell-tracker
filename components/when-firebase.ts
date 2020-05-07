@@ -19,7 +19,7 @@ import 'firebase/firestore';
 
 import { useState } from 'react';
 import { concat, Observable, Observer, of, throwError } from 'rxjs';
-import { filter, flatMap, map } from 'rxjs/operators';
+import { filter, map } from 'rxjs/operators';
 import { useObservable } from './use-helpers';
 
 function queryUpdates<T>(query: Query): Observable<QuerySnapshot<T>> {
@@ -30,23 +30,13 @@ function documentUpdates(doc: DocumentReference): Observable<DocumentSnapshot> {
   return Observable.create(doc.onSnapshot.bind(doc));
 }
 
-export function toData<T>(doc: DocumentSnapshot): T | null {
+export function toData<T>(doc: DocumentSnapshot): DocumentSnapshot<T> | null {
   if (!doc.exists) {
     return null;
   }
 
   const data: any = doc.data();
-  return data as T;
-}
-
-function toDatas<T>(query: QuerySnapshot): T[] {
-  return query.docs.reduce((acc: T[], x) => {
-    const item = toData<T>(x);
-    if (item) {
-      acc.push(item);
-    }
-    return acc;
-  }, []);
+  return doc as DocumentSnapshot<T>;
 }
 
 export function useDocumentData<T>(
@@ -55,7 +45,7 @@ export function useDocumentData<T>(
 ) {
   const [d] = useState(doc);
 
-  return useObservable<T | null>(() => {
+  return useObservable<DocumentSnapshot<T> | null>(() => {
     const initial = snapshot
       ? of(toData<T>(snapshot))
       : d.get().then(x => toData<T>(x));
