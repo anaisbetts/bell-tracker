@@ -18,6 +18,10 @@ export abstract class Result<T> {
       ex => Result.Err(ex));
   }
 
+  isUndefined() {
+    return this.mapOrElse(false, x => x === undefined);
+  }
+
   expect(): T {
     if (this.isErr()) {
       throw new Error('Value is an Error and we expected an Ok');

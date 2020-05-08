@@ -3,7 +3,7 @@ import { db } from './firebase';
 import { firestore, auth } from 'firebase/app';
 import { seeds } from './seeds';
 import { asyncMap } from './promise-extra';
-import { listenDocument } from './when-firebase';
+import { listenDocument, useQuery } from './when-firebase';
 import { flatMap } from 'rxjs/operators';
 import { of } from 'rxjs';
 
@@ -48,6 +48,16 @@ export function listenCurrentBells() {
   return listenDocument(currentBellsDoc()).pipe(
     flatMap(x => x.exists ? of(x.data()!.value as number) : fetchAndUpdateCurrentBells())
   );
+}
+
+export function useBellEventsForToday() {
+  let now = new Date();
+  const toSubtract = 
+    (now.getHours() * 60 * 60 * 1000) +
+    (now.getMinutes() * 60 * 1000);
+  const time = new Date(now.getTime() - toSubtract);
+
+  return useQuery<BellEvent>(() => eventsColl().where('createdAt', '>=', time));
 }
 
 function seedNewAggregate() {
@@ -109,6 +119,21 @@ export async function addBellEvent(activityId: string) {
   await fetchAndUpdateCurrentBells();
 
   return ret;
+}
+
+export async function deleteBellEvent(eventId: string) {
+  const ev  = await eventsColl().doc(eventId).get() as firestore.DocumentSnapshot<BellEvent>;
+  if (!ev.exists) {
+    throw new Error("Event doesn't exist!");
+  }
+
+  const bells = await fetchAndUpdateCurrentBells();
+  await currentBellsDoc().update({
+    computedAt: new Date(),
+    value: bells - ev.data()!.value,
+  });
+
+  await ev.ref.delete();
 }
 
 export async function populateFromSeeds() {
