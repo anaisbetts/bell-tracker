@@ -1,0 +1,9 @@
+{
+  "name": "Bell Tracker",
+  "short_name": "Bells",
+  "theme_color": "#4f6bbf",
+  "background_color": "#4f6bbf",
+  "display": "standalone",
+  "scope": "/",
+  "start_url": "/mamas"
+}

@@ -97,12 +97,6 @@ const PageContainer: React.FunctionComponent = ({ children }) => {
   return (
     <>
       <Head>
-        <link href='https://fonts.googleapis.com/css?family=Pacifico&display=swap' rel='stylesheet'></link>
-        <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro&display=swap' rel='stylesheet'></link>
-        <meta
-          name="viewport"
-          content="minimum-scale=1, initial-scale=1, width=device-width"
-        />
       </Head>
 
       {stylesheet}
