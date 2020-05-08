@@ -134,6 +134,7 @@ export async function deleteBellEvent(eventId: string) {
   });
 
   await ev.ref.delete();
+  await fetchAndUpdateCurrentBells();
 }
 
 export async function populateFromSeeds() {
