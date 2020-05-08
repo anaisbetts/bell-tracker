@@ -82,7 +82,7 @@ const EventsList: React.FC<{events: firestore.DocumentSnapshot<BellEvent>[], act
     acc.push(
       <li key={x.id + "desc"}>{activityLookup[x.data()!.activityId.id].description}</li>,
       <li style={{justifySelf: 'right', alignSelf: 'center'}} key={x.id + "val"}>{x.data()!.value}</li>,
-      <Button onClick={del} style={{justifySelf: 'right', minWidth: 8, alignSelf: 'center'}}>❌</Button>
+      <Button key={x.id + "btn"} onClick={del} style={{justifySelf: 'right', minWidth: 8, alignSelf: 'center'}}>❌</Button>
     );
 
     return acc;
@@ -123,7 +123,7 @@ export default () => {
   const activityMarkup = bells.and(eventsColl).and(activityColl).mapOrElse(
     <h2>Error loading activities!</h2>,
     (xs) => {
-      if (bells.isUndefined() || eventsColl.isUndefined() || activityColl.isUndefined()) {
+      if (bells.isUndefined() || activityColl.isUndefined()) {
         return <h2>Loading...</h2>;
       }
 
@@ -133,10 +133,11 @@ export default () => {
 
       const bellCount = bells.ok()!;
 
+      const events = eventsColl.ok() ? eventsColl.ok()!.docs : [];
       return <>
         <h2>Adeline has {bellCount} bells!</h2>
 
-        <EventsList events={eventsColl.ok()!.docs} activities={activityColl.ok()!.docs} />
+        <EventsList events={events} activities={activityColl.ok()!.docs} />
 
         <ActivityButtonSection currentBells={bellCount} label="Add Bells" items={gaining} />
         <ActivityButtonSection currentBells={bellCount} label="Take Bells" items={losing} />
