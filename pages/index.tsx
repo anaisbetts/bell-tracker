@@ -12,10 +12,11 @@ export default () => (
   <>
     <style jsx global>{`
       .container {
-        padding: 128px;
+        padding-left: 24px;
+        padding-right: 24px;
+        overflow-y: auto;
       }
     `}</style>
-
 
     <PageContainer>
       <SSRIsAStupidFeatureThatIsMoreTroubleThanItsWorth />
